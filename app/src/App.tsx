@@ -51,6 +51,15 @@ function App() {
   }, [])
 
   const playerRef = useRef<ReturnType<typeof createPlayer> | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Clean up player when navigating away from analysis views
+  const cleanupPlayer = useCallback(() => {
+    playerRef.current?.destroy()
+    playerRef.current = null
+    setPlaybackTime(0)
+    setIsPlaying(false)
+  }, [])
 
   const handleModelChange = useCallback((id: string) => {
     setModelId(id)
@@ -91,12 +100,13 @@ function App() {
 
     // Set up playback if we have audio
     if (blob) {
-      playerRef.current?.destroy()
+      cleanupPlayer()
       const player = createPlayer(blob)
       player.onTimeUpdate(setPlaybackTime)
+      player.onStateChange(setIsPlaying)
       playerRef.current = player
     }
-  }, [])
+  }, [cleanupPlayer])
 
   const handleSeek = useCallback((time: number) => {
     if (playerRef.current) {
@@ -118,13 +128,11 @@ function App() {
   }, [deleteConfirmId])
 
   const goHome = useCallback(() => {
-    playerRef.current?.destroy()
-    playerRef.current = null
-    setPlaybackTime(0)
+    cleanupPlayer()
     setSelectedSession(null)
     reset()
     setView('home')
-  }, [reset])
+  }, [reset, cleanupPlayer])
 
   // Check if calibration is done
   const hasBaseline = sessions.some(s => s.analysis.promptId === 'baseline')
@@ -149,11 +157,9 @@ function App() {
       const targetView = state?.view ?? 'home'
       // Navigate without pushing another history entry
       if (targetView !== viewRef.current) {
+        cleanupPlayer()
         setView(targetView)
         if (targetView === 'home') {
-          playerRef.current?.destroy()
-          playerRef.current = null
-          setPlaybackTime(0)
           setSelectedSession(null)
           reset()
         }
@@ -187,7 +193,7 @@ function App() {
         </button>
         <nav className="flex gap-4" aria-label="Main navigation">
           <button
-            onClick={() => { reset(); setView('record'); }}
+            onClick={() => { cleanupPlayer(); reset(); setView('record'); }}
             aria-current={view === 'record' ? 'page' : undefined}
             className={`text-sm cursor-pointer transition-colors ${view === 'record' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}
           >
@@ -195,6 +201,7 @@ function App() {
           </button>
           <button
             onClick={() => {
+              cleanupPlayer()
               // Skip to the step that needs doing
               setCalibrationStep(hasBaseline ? 'dramatic' : 'baseline')
               reset()
@@ -206,7 +213,7 @@ function App() {
             {isCalibrated ? 'Re-calibrate' : 'Calibrate'}
           </button>
           <button
-            onClick={() => setView('history')}
+            onClick={() => { cleanupPlayer(); setView('history'); }}
             aria-current={view === 'history' ? 'page' : undefined}
             className={`text-sm cursor-pointer transition-colors ${view === 'history' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}
           >
@@ -408,14 +415,16 @@ function App() {
             onVerdictGenerated={handleVerdictGenerated}
             playbackTime={playbackTime}
             onSeek={handleSeek}
+            isPlaying={isPlaying}
             onPlayPause={() => {
               if (!playerRef.current && audioBlob) {
                 const player = createPlayer(audioBlob)
                 player.onTimeUpdate(setPlaybackTime)
+                player.onStateChange(setIsPlaying)
                 playerRef.current = player
               }
               if (playerRef.current) {
-                playerRef.current.play()
+                playerRef.current.togglePlayPause()
               }
             }}
             onNewRecording={() => { reset(); }}
@@ -703,6 +712,7 @@ function AnalysisView({
   onVerdictGenerated,
   playbackTime,
   onSeek,
+  isPlaying,
   onPlayPause,
   onNewRecording,
 }: {
@@ -712,6 +722,7 @@ function AnalysisView({
   onVerdictGenerated: (analysisId: string, verdict: string) => void
   playbackTime: number
   onSeek: (time: number) => void
+  isPlaying?: boolean
   onPlayPause?: () => void
   onNewRecording: () => void
 }) {
@@ -785,10 +796,11 @@ function AnalysisView({
           {onPlayPause && (
             <button
               onClick={onPlayPause}
+              aria-label={isPlaying ? 'Pause playback' : 'Play recording'}
               className="px-3 py-1.5 text-sm rounded-lg cursor-pointer transition-colors"
               style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
             >
-              Play
+              {isPlaying ? 'Pause' : 'Play'}
             </button>
           )}
           <button

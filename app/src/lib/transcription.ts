@@ -112,10 +112,13 @@ export async function transcribeAudio(
   })
 
   // Use segment-level timestamps — works with all ONNX exports (no cross-attention needed)
+  // The initial_prompt biases Whisper's decoder toward preserving filler words
+  // (um, uh, like, you know) that it would otherwise silently omit from output.
   const result = await pipe(audioData, {
     return_timestamps: true,
     chunk_length_s: 30,
     stride_length_s: 5,
+    initial_prompt: "Umm, let me think like, hmm... Okay, here's what I'm, like, thinking. Um, you know, it's, uh, basically, I mean, right, so, actually,",
   })
 
   const output: ASROutput = Array.isArray(result) ? result[0] : result

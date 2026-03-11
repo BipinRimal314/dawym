@@ -75,20 +75,32 @@ export function createRecorder(stream: MediaStream): {
 export function createPlayer(blob: Blob): {
   play: () => void
   pause: () => void
+  togglePlayPause: () => void
   seek: (time: number) => void
+  isPlaying: () => boolean
   getCurrentTime: () => number
   getDuration: () => number
   onTimeUpdate: (cb: (time: number) => void) => void
+  onStateChange: (cb: (playing: boolean) => void) => void
   destroy: () => void
 } {
   const url = URL.createObjectURL(blob)
   const audio = new Audio(url)
-  const callbacks: Array<(time: number) => void> = []
+  const timeCallbacks: Array<(time: number) => void> = []
+  const stateCallbacks: Array<(playing: boolean) => void> = []
+
+  const notifyState = (playing: boolean) => {
+    for (const cb of stateCallbacks) cb(playing)
+  }
 
   audio.addEventListener('timeupdate', () => {
     const t = audio.currentTime
-    for (const cb of callbacks) cb(t)
+    for (const cb of timeCallbacks) cb(t)
   })
+
+  audio.addEventListener('play', () => notifyState(true))
+  audio.addEventListener('pause', () => notifyState(false))
+  audio.addEventListener('ended', () => notifyState(false))
 
   return {
     play() {
@@ -99,8 +111,20 @@ export function createPlayer(blob: Blob): {
       audio.pause()
     },
 
+    togglePlayPause() {
+      if (audio.paused || audio.ended) {
+        audio.play()
+      } else {
+        audio.pause()
+      }
+    },
+
     seek(time: number) {
       audio.currentTime = time
+    },
+
+    isPlaying(): boolean {
+      return !audio.paused && !audio.ended
     },
 
     getCurrentTime(): number {
@@ -112,7 +136,11 @@ export function createPlayer(blob: Blob): {
     },
 
     onTimeUpdate(cb: (time: number) => void) {
-      callbacks.push(cb)
+      timeCallbacks.push(cb)
+    },
+
+    onStateChange(cb: (playing: boolean) => void) {
+      stateCallbacks.push(cb)
     },
 
     destroy() {
