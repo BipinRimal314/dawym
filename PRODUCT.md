@@ -6,9 +6,11 @@ A speech sparring partner that fights back. Record yourself, argue against an un
 
 ## Origin
 
-Built from a Toastmasters game where two people role-played: one was an authority figure (mother, principal, traffic cop) who could be as irrationally stubborn as they wanted, and the other had to persuade them. The game taught something no speech course does: the world doesn't run on logic. Persuasion means reading the room and adapting to someone who doesn't want to be persuaded.
+Born from watching a friend argue with his mother. She was stubborn, irrational, impossible to convince. He argued with her anyway, every time. Not to win; just to practice articulating what he meant under pressure from someone who would never concede the point.
 
-DAWYM is that game, digitized and expanded. The AI is the Mother. You are the one who has to make your case.
+The pattern showed up everywhere. The sharpest communicators had all spent years confronting authority figures, asking unwelcome questions, rebutting positions that weren't going to change. They weren't argumentative by nature. They were argumentative by practice. That practice made them better at expressing their ideas than anyone who only spoke to agreeable audiences.
+
+DAWYM is that practice, digitized and expanded. The AI is the Mother. You are the one who has to make your case.
 
 ## Core Thesis
 
