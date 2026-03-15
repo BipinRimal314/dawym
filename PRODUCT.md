@@ -308,6 +308,23 @@ Adds LLM-powered analysis on top of local metrics.
 - [ ] Post-round evaluation (strategy analysis + voice metrics during argument)
 - [ ] Win/loss tracking
 
+**Phase 3.5 — Table Topics & Argumentation Prompts**
+
+- [ ] Table Topics mode: timed impromptu speaking (1-2 minutes) with random prompts from curated categories
+  - Categories: opinion, storytelling, hypothetical, philosophical, current events, Toastmasters classics
+  - Timer with visual countdown + audio warning at 30s remaining
+  - Auto-analyze the impromptu response with full Mirror metrics
+  - Score structure (did they open, develop, close?) even under time pressure
+  - Track improvement over time: how quickly does the speaker find a thesis?
+- [ ] "Don't Argue With Your Mother" topic bank: curated real-world argumentation scenarios people can practice with
+  - Everyday conflicts: landlord disputes, customer service, family disagreements
+  - Professional: salary negotiation, project pushback, deadline extensions
+  - High-stakes: job interviews, investor pitches, public hearings
+  - Absurd (comedy difficulty): convince a cat to come inside, argue that Monday is the best day
+  - User-submitted custom scenarios
+- [ ] Prompt randomizer: "Give me something to argue about" button
+- [ ] Session tagging: Table Topics vs. Prepared vs. Sparring for separate trend tracking
+
 **Phase 4 — Depth**
 
 - [ ] All 6 personas + difficulty scaling (Easy/Medium/Hard/Impossible)
